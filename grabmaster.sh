@@ -5,16 +5,16 @@
 # Version October 2017
 # Fist version October 2006
 SLAVES=${SLAVES:-3}
-TRANS_DIR=${TRANS_DIR:-$HOME}
+GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
 DAEMONIZER=${DAEMONIZER:-daemon.pl}
 GRABBER=`which grabber.sh`
  
-mkdir -p $TRANS_DIR/Grabber/{log,queue,spool,varlock,tmp}
+mkdir -p $GRAB_BASEDIR/Grabber/{log,queue,spool,varlock,tmp}
 
 case $1  in  
 
 	start)
-	for i in `seq 1 $SLAVES`; do daemon.pl $GRABBER grabber$i $TRANS_DIR/Grabber;done
+	for i in `seq 1 $SLAVES`; do daemon.pl $GRABBER grabber$i $GRAB_BASEDIR/Grabber;done
 	$0 status 
 	;;
 
@@ -29,8 +29,8 @@ case $1  in
 
 	restart)
 	killall grabber.sh
-	find $TRANS_DIR/Grabber/varlock/ -type f -exec rm {} \;
-	for i in `seq 1 $SLAVES`; do daemon.pl $GRABBER grabber$i $TRANS_DIR/Grabber;done
+	find $GRAB_BASEDIR/Grabber/varlock/ -type f -exec rm {} \;
+	for i in `seq 1 $SLAVES`; do daemon.pl $GRABBER grabber$i $GRAB_BASEDIR/Grabber;done
 	$0 status
 	;;
 
@@ -39,20 +39,20 @@ case $1  in
 	;;
 
 	stop)
-	for i in `seq 1 $SLAVES`; do touch $TRANS_DIR/Grabber/varlock/grabber$i.stop;done
+	for i in `seq 1 $SLAVES`; do touch $GRAB_BASEDIR/Grabber/varlock/grabber$i.stop;done
 	;;
 
 	force-stop)
 	killall grabber.sh
-	find $TRANS_DIR/Grabber/varlock/ -type f -exec rm {} \;
+	find $GRAB_BASEDIR/Grabber/varlock/ -type f -exec rm {} \;
 	;;
 
 	clear-queue)
-	find $TRANS_DIR/Grabber/queue/ -type f -exec rm {} \;
+	find $GRAB_BASEDIR/Grabber/queue/ -type f -exec rm {} \;
 	;;
 
 	clear-spool)
-	find $TRANS_DIR/Grabber/spool/ -type f -exec rm {} \;
+	find $GRAB_BASEDIR/Grabber/spool/ -type f -exec rm {} \;
 	;;
 
 	clear-all)
@@ -61,18 +61,18 @@ case $1  in
 	;;
 
 	queue)
-	find $TRANS_DIR/Grabber/queue -type f -ls
+	find $GRAB_BASEDIR/Grabber/queue -type f -ls
 	;;
 
 	spool)
-	find $TRANS_DIR/Grabber/spool -type f -ls
+	find $GRAB_BASEDIR/Grabber/spool -type f -ls
 	;;
 
 	test)
-	for i in `seq 1 $SLAVES`; do echo "date;sleep 10" > $TRANS_DIR/Grabber/queue/task$i.sh;done
+	for i in `seq 1 $SLAVES`; do echo "date;sleep 10" > $GRAB_BASEDIR/Grabber/queue/task$i.sh;done
 	;;
 
-	usage|*)
+	usage|help|*)
 	echo
 	echo
 	echo "Grabmaster - grabber by Meir Michanie meirm@riunx.com"
@@ -81,7 +81,5 @@ case $1  in
 	echo "Usage:"
 	echo $0 "[start|status|stop|cond-restart|restart|force-stop|clear-queue|clear-spool|clear-all|queue|spool|test]"
 	echo
-	echo "[daemon.pl] grabber.sh grabberuniquename queue"
-	echo "grabber.sh grabber1 /home/mark/Transformation/Grabber"
 	;;	
 esac
