@@ -36,7 +36,7 @@ case $1  in
 	;;
 
 	status)
-	ps -ef | grep grabber.s[h]
+	ps -ef | grep grabber.sh | grep -v grep
 	;;
 
 	stop)
