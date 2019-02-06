@@ -2,7 +2,7 @@
 # Released under GPL License
 # by Meir Michanie 
 # meirm@riunx.com
-# Version October 2017
+# Version February 2019
 # Fist version October 2006
 SLAVES=${SLAVES:-3}
 GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
