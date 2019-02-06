@@ -79,6 +79,12 @@ case $1  in
 	echo "Grabmaster - grabber by Meir Michanie meirm@riunx.com"
 	echo "Released under GPL License"
 	echo
+	echo "Environment variables:"
+	echo "WORKERNAME # default value 'grabber'"
+	echo "SLAVES # default value 3"
+	echo 'GRAB_BASEDIR # default value $HOME'
+	echo 'DAEMONIZER # default value daemon.pl'
+	echo
 	echo "Usage:"
 	echo $0 "[start|status|stop|cond-restart|restart|force-stop|clear-queue|clear-spool|clear-all|queue|spool|test]"
 	echo
