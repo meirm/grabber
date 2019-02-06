@@ -8,13 +8,14 @@ SLAVES=${SLAVES:-3}
 GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
 DAEMONIZER=${DAEMONIZER:-daemon.pl}
 GRABBER=`which grabber.sh`
+WORKERNAME=${WORKERNAME:-grabber}
  
 mkdir -p $GRAB_BASEDIR/Grabber/{log,queue,spool,varlock,tmp}
 
 case $1  in  
 
 	start)
-	for i in `seq 1 $SLAVES`; do daemon.pl $GRABBER grabber$i $GRAB_BASEDIR/Grabber;done
+	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber;done
 	$0 status 
 	;;
 
@@ -30,7 +31,7 @@ case $1  in
 	restart)
 	killall grabber.sh
 	find $GRAB_BASEDIR/Grabber/varlock/ -type f -exec rm {} \;
-	for i in `seq 1 $SLAVES`; do daemon.pl $GRABBER grabber$i $GRAB_BASEDIR/Grabber;done
+	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber;done
 	$0 status
 	;;
 
@@ -39,7 +40,7 @@ case $1  in
 	;;
 
 	stop)
-	for i in `seq 1 $SLAVES`; do touch $GRAB_BASEDIR/Grabber/varlock/grabber$i.stop;done
+	for i in `seq 1 $SLAVES`; do touch $GRAB_BASEDIR/Grabber/varlock/$WORKERNAME$i.stop;done
 	;;
 
 	force-stop)
