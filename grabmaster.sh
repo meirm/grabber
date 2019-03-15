@@ -25,11 +25,12 @@ SLAVES=${SLAVES:-3}
 
 # GRAB_BASEDIR is the hosting branch of our grabber directory structure
 # $GRAB_BASEDIR/Grabber
-#                   |_> log
-#                   |_> queue
-#                   |_> spool
-#                   |_> varlock
-#                   |_> tmp
+#                   |_> log # Here we keep a tali
+#                   |_> queue # Common queue for grabbers to fetch a job to execute
+#                   |_> spool/<grabnameX> # Here each grabber will grab the jobfile
+#                   |_> ctrl/<grabnameX> # Each grabber dedicated queue
+#                   |_> varlock # control the grabbers through files here.
+#                   |_> tmp # Temporary support directory
 GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
 
 # We use daemon.pl from http://github.com/meirm/ instead of nohup
@@ -56,7 +57,7 @@ if [ $? -ne 0 ] ; then # fallback to nohup
 fi
 
 # We make sure that we have a workable filesystem to work on.
-mkdir -p $GRAB_BASEDIR/Grabber/{log,queue,spool,varlock,tmp}
+mkdir -p $GRAB_BASEDIR/Grabber/{log,queue,spool,ctrl,varlock,tmp}
 on_error $? "Critical: Failed to create Grabber directory in $GRAB_BASEDIR/"
 
 case $1  in  
