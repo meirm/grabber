@@ -3,19 +3,69 @@
 # by Meir Michanie 
 # meirm@riunx.com
 # Version February 2019
-# Fist version October 2006
+
+#####
+# Support functions.
+on_error(){
+ lvl=$1;
+ shift
+ if [ $lvl -ne 0 ]; then
+	 echo "$@"
+	 exit $lvl
+ fi
+}
+
+##### 
+# Set some basic values
+# ---------------------
+# You can override these values with exported environment variables.
+
+# SLAVES are the number of grabbers we will launch
 SLAVES=${SLAVES:-3}
+
+# GRAB_BASEDIR is the hosting branch of our grabber directory structure
+# $GRAB_BASEDIR/Grabber
+#                   |_> log
+#                   |_> queue
+#                   |_> spool
+#                   |_> varlock
+#                   |_> tmp
 GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
+
+# We use daemon.pl from http://github.com/meirm/ instead of nohup
+# daemon.pl by default sends all output to /dev/null and runs the program in the background
+# if we need to redirect or put in background as when running nohup
 DAEMONIZER=${DAEMONIZER:-daemon.pl}
+DAEMONIZER_REDIR=""
+#DAEMONIZER="nohup"
+#DAEMONIZER_REDIR=">/dev/null &"
+
+# We need to have the grabber command in our executable path or
+# we need to provide the full path to the executable.
 GRABBER=`which grabber.sh`
+
+# By default each grabber share a common prefix in its name and only get a number for differentiation.
 WORKERNAME=${WORKERNAME:-grabber}
- 
+
+######
+
+# In case that we choose to use daemon.pl and it is not available, fall back to nohup
+which $DAEMONIZER > /dev/null
+if [ $? -ne 0 ] ; then # fallback to nohup
+	on_error 1 "Critical: $DAEMONIZER is not executable"
+fi
+
+# We make sure that we have a workable filesystem to work on.
 mkdir -p $GRAB_BASEDIR/Grabber/{log,queue,spool,varlock,tmp}
+on_error $? "Critical: Failed to create Grabber directory in $GRAB_BASEDIR/"
 
 case $1  in  
 
 	start)
-	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber;done
+		for i in `seq 1 $SLAVES`; do 
+			echo "$DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber $DAEMONIZER_REDIR";
+			$DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber $DAEMONIZER_REDIR;
+		done
 	$0 status 
 	;;
 
@@ -36,7 +86,7 @@ case $1  in
 	;;
 
 	status)
-	ps -ef | grep grabber.sh | grep -v grep
+	ps -ef | grep grabber.sh | grep $WORKERNAME | grep -v grep
 	;;
 
 	stop)
@@ -70,7 +120,11 @@ case $1  in
 	;;
 
 	test)
-	for i in `seq 1 $SLAVES`; do echo "date;sleep 10" > $GRAB_BASEDIR/Grabber/queue/task$i.sh;done
+		(( nr_tasks=$SLAVES + 3 )) 
+		for i in `seq 1 $nr_tasks`; do 
+			random_sleep=`echo $RANDOM | tail -c 3`
+			echo "date;sleep $random_sleep" > $GRAB_BASEDIR/Grabber/queue/task$i.sh;
+		done
 	;;
 
 	usage|help|*)
