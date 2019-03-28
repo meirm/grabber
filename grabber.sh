@@ -24,6 +24,12 @@ if [ $# -ne 2 ] ; then
 	exit 0
 fi
 
+if [ ! -d "$2" ] ; then
+	printerror "CRITICAL: <clusterpath>  dir ($2)  doesn't exist"
+	exit 1
+	exit 0
+fi
+
 export GRABBERNAME=$1;
 export CLUSTERPATH=$2;
 export QUEUEVARLOCK="$CLUSTERPATH/varlock";
@@ -31,7 +37,7 @@ export QUEUE="$CLUSTERPATH/queue/";
 export SPOOL="$CLUSTERPATH/spool/$GRABBERNAME";
 export CTRLQUEUE="$CLUSTERPATH/ctrl/$GRABBERNAME";
 export SPOOLLOG="$CLUSTERPATH/log";
-LOCKFILE=$QUEUEVARLOCK/$GRABBERNAME.lock
+export LOCKFILE=$QUEUEVARLOCK/$GRABBERNAME.lock
 if [ -f $LOCKFILE ]; then
 	printerror  "Error: Grabber $GRABBERNAME already running"
 	printerror  "or stalled, remove $LOCKFILE"
