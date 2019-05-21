@@ -36,10 +36,10 @@ GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
 # We use daemon.pl from http://github.com/meirm/ instead of nohup
 # daemon.pl by default sends all output to /dev/null and runs the program in the background
 # if we need to redirect or put in background as when running nohup
-DAEMONIZER=${DAEMONIZER:-daemon.pl}
-DAEMONIZER_REDIR=""
-#DAEMONIZER="nohup"
-#DAEMONIZER_REDIR=">/dev/null &"
+#DAEMONIZER=${DAEMONIZER:-daemon.pl}
+#DAEMONIZER_REDIR=""
+DAEMONIZER="nohup"
+DAEMONIZER_REDIR=">/dev/null &"
 
 # We need to have the grabber command in our executable path or
 # we need to provide the full path to the executable.
@@ -82,7 +82,7 @@ case $1  in
 	restart)
 	killall grabber.sh
 	find $GRAB_BASEDIR/Grabber/varlock/ -type f -exec rm {} \;
-	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber;done
+	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber $DAEMONIZER_REDIR;done
 	$0 status
 	;;
 
@@ -132,7 +132,7 @@ case $1  in
 	echo
 	echo
 	echo "Grabmaster - grabber by Meir Michanie meirm@riunx.com"
-	echo "Released under GPL License"
+	echo "Released under GPL License v2"
 	echo
 	echo "Environment variables:"
 	echo "WORKERNAME # default value 'grabber'"

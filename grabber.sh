@@ -27,7 +27,6 @@ fi
 if [ ! -d "$2" ] ; then
 	printerror "CRITICAL: <clusterpath>  dir ($2)  doesn't exist"
 	exit 1
-	exit 0
 fi
 
 export GRABBERNAME=$1;
