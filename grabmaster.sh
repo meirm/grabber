@@ -15,7 +15,45 @@ on_error(){
  fi
 }
 
+function create_config {
+cat << EOF
+####################
+# Default location:
+# ~/.grabberrc
+#
+# To use another file set the var GRABBERCONF
+####################
+SLAVES=2
+# GRAB_BASEDIR is the hosting branch of our grabber directory structure
+# GRAB_BASEDIR/Grabber
+#                   |_> log # Here we keep a tali
+#                   |_> queue # Common queue for grabbers to fetch a job to execute
+#                   |_> spool/<grabnameX> # Here each grabber will grab the jobfile
+#                   |_> ctrl/<grabnameX> # Each grabber dedicated queue
+#                   |_> varlock # control the grabbers through files here.
+#                   |_> tmp # Temporary support directory
+GRAB_BASEDIR=\$HOME
+
+# We use daemon.pl from http://github.com/meirm/ instead of nohup
+# daemon.pl by default sends all output to /dev/null and runs the program in the background
+# if we need to redirect or put in background as when running nohup
+DAEMONIZER=daemon.pl
+# We need to have the grabber command in our executable path or
+# we need to provide the full path to the executable.
+GRABBER=`which grabber.sh`
+
+# By default each grabber share a common prefix in its name and only get a number for differentiation.
+WORKERNAME="grabber"
+EOF
+}
+
+
 ##### 
+# *** DO NOT EDIT THIS VALUES ***
+# 
+# You can replace their values reading their value from a config file
+#
+#
 # Set some basic values
 # ---------------------
 # You can override these values with exported environment variables.
@@ -36,10 +74,7 @@ GRAB_BASEDIR=${GRAB_BASEDIR:-$HOME}
 # We use daemon.pl from http://github.com/meirm/ instead of nohup
 # daemon.pl by default sends all output to /dev/null and runs the program in the background
 # if we need to redirect or put in background as when running nohup
-#DAEMONIZER=${DAEMONIZER:-daemon.pl}
-#DAEMONIZER_REDIR=""
-DAEMONIZER="nohup"
-DAEMONIZER_REDIR=">/dev/null &"
+DAEMONIZER=daemon.pl
 
 # We need to have the grabber command in our executable path or
 # we need to provide the full path to the executable.
@@ -47,8 +82,15 @@ GRABBER=`which grabber.sh`
 
 # By default each grabber share a common prefix in its name and only get a number for differentiation.
 WORKERNAME=${WORKERNAME:-grabber}
-
+#
 ######
+GRABBERCONF=${GRABBERCONF:-$HOME/.grabberrc}
+
+if [ -f $GRABBERCONF ] ; then 
+	source $GRABBERCONF
+else
+	create_config > $HOME/.grabberrc
+fi
 
 # In case that we choose to use daemon.pl and it is not available, fall back to nohup
 which $DAEMONIZER > /dev/null
@@ -64,8 +106,8 @@ case $1  in
 
 	start)
 		for i in `seq 1 $SLAVES`; do 
-			echo "$DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber $DAEMONIZER_REDIR";
-			$DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber $DAEMONIZER_REDIR;
+			echo "$DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber" ;
+			$DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber;
 		done
 	$0 status 
 	;;
@@ -82,7 +124,7 @@ case $1  in
 	restart)
 	killall grabber.sh
 	find $GRAB_BASEDIR/Grabber/varlock/ -type f -exec rm {} \;
-	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber $DAEMONIZER_REDIR;done
+	for i in `seq 1 $SLAVES`; do $DAEMONIZER $GRABBER $WORKERNAME$i $GRAB_BASEDIR/Grabber;done
 	$0 status
 	;;
 
@@ -114,6 +156,10 @@ case $1  in
 
 	queue)
 	find $GRAB_BASEDIR/Grabber/queue -type f -ls
+	;;
+
+	sampleconfig)
+	create_config
 	;;
 
 	spool)
