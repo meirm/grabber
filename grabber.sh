@@ -6,6 +6,8 @@
 # Version 0.3 June 2017
 # Version 0.2 April 2017
 # Version 0.1 October 2006
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+SCRIPTNAME="$( basename $0)"
 
 ##### Support functions
 printerror() {
@@ -14,7 +16,7 @@ echo $@  1>&2
 
 printusage() {
 printerror "Usage:" 
-printerror "$0 <grabbername> <clusterpath>"
+printerror "$SCRIPTNAME <grabbername> <clusterpath>"
 }
 
 ###########

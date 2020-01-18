@@ -2,7 +2,7 @@
 # Released under GPL License
 # by Meir Michanie 
 # meirm@riunx.com
-# Version February 2019
+# Version January 2020
 SCRIPTVERSION="0.1"
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 SCRIPTNAME="$( basename $0)"
@@ -14,9 +14,21 @@ log_echo(){
     literal=$1;shift
     eval lvl='$'"$literal"
     msg="$@"
-    if [ "$lvl" -ge $VERBOSE ]; then
+    if [ "$lvl" -le $VERBOSE ]; then
         echo "$literal: $msg"
     fi
+}
+
+log_info(){
+    log_echo  INFO "$@"
+}
+
+log_debug(){
+    log_echo  DEBUG "$@"
+}
+
+log_error(){
+    log_echo  ERROR "$@"
 }
 
 #####
@@ -52,7 +64,7 @@ usage(){
 }
 
 function create_config {
-    log_echo "DEBUG" "Creating config file at $HOME/.grabberrc"
+    log_echo DEBUG "Creating config file at $HOME/.grabberrc"
     cat << EOF
 ####################
 # Default location:
@@ -142,6 +154,7 @@ load_config(){
     on_error $? "Critical: Failed to create Grabber directory in $GRAB_BASEDIR/"
 }
 main(){
+
     if [ "$1" -eq "-v" ];then
         shift;
         VERBOSE=$1
